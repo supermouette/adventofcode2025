@@ -38,12 +38,14 @@ merged_ranges = []
 old_ranges = ""
 while old_ranges != str(merged_ranges):
     old_ranges = str(merged_ranges)
-    ranges.sort(key=lambda x: -(x[1] - x[0]))
     merged_ranges = [ranges[0]]
     for a, b in ranges[1:]:
         for i, (ma, mb) in enumerate(merged_ranges):
-            if ma <= a <= mb and ma <= b <= mb:
-                break  # range already covered
+            if ma <= a <= mb and ma <= b <= mb:  # range already covered
+                break
+            if a <= ma <= b and a <= mb <= b:  # current range bigger
+                merged_ranges[i] = [a, b]
+                break
             elif ma <= a <= mb and b > mb:  # range extended with max
                 merged_ranges[i][1] = b
                 break
@@ -54,14 +56,13 @@ while old_ranges != str(merged_ranges):
             merged_ranges.append([a, b])
     ranges = merged_ranges.copy()
 
-# print(merged_ranges)
-
-merged_ranges.sort(key=lambda x: x[0])
 
 for i, (a, b) in enumerate(merged_ranges):
     fresh_count += b - a + 1
 
 print(fresh_count)
+
+merged_ranges.sort(key=lambda x: x[0])
 
 
 for i, (a, b) in enumerate(merged_ranges):
