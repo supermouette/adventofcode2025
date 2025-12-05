@@ -1,4 +1,6 @@
-with open("test.txt") as f:
+import matplotlib.pyplot as plt
+
+with open("input.txt") as f:
     lines = f.readlines()
 
 # parsing
@@ -36,6 +38,7 @@ merged_ranges = []
 old_ranges = ""
 while old_ranges != str(merged_ranges):
     old_ranges = str(merged_ranges)
+    ranges.sort(key=lambda x: -(x[1] - x[0]))
     merged_ranges = [ranges[0]]
     for a, b in ranges[1:]:
         for i, (ma, mb) in enumerate(merged_ranges):
@@ -53,7 +56,14 @@ while old_ranges != str(merged_ranges):
 
 # print(merged_ranges)
 
-for a, b in merged_ranges:
+merged_ranges.sort(key=lambda x: x[0])
+
+for i, (a, b) in enumerate(merged_ranges):
     fresh_count += b - a + 1
 
-print(fresh_count)  # previous try 346937689802200
+print(fresh_count)
+
+
+for i, (a, b) in enumerate(merged_ranges):
+    plt.plot([a, b], [i, i])
+plt.show()
