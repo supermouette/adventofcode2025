@@ -8,11 +8,11 @@ for i in range(len(tiles)):
     for j in range(i + 1, len(tiles)):
         x1, y1 = tiles[i]
         x2, y2 = tiles[j]
-        areas.append((abs(x1 - x2) + 1) * (abs(y1 - y2) + 1))
-print(max(areas))
+        areas.append((i, j, (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1)))
+areas.sort(key=lambda x: -x[2])
+print(areas[0][2])
 
 # p2
-
 green_tiles = set()
 
 for i in range(len(tiles)):
@@ -25,27 +25,12 @@ for i in range(len(tiles)):
         for j in range(min(y1, y2), max(y1, y2) + 1):
             green_tiles.add((x1, j))
 
-"""
-for i in range(13):
-    s = []
-    for j in range(9):
-        if (i, j) == (3, 4):
-            s.append("o")
-        else:
-            s.append("#" if (i, j) in green_tiles else ".")
-    print("".join(s))
-"""
-
-areas = []
-
 xs = [x for x, y in tiles]
 min_x = min(xs) - 1
 max_x = max(xs) + 1
-# ys = [y for x, y in tiles]
-# min_y = min(ys) - 1
-# max_y = max(ys) + 1
 
 inner_tiles = set()
+outer_tiles = set()
 
 
 def is_in_polygon(x, y):
@@ -53,9 +38,22 @@ def is_in_polygon(x, y):
     if (x, y) in green_tiles:
         return True
     # check if there is an immediate neighbor which is inside inner_tiles
-    if (x - 1, y) in inner_tiles or (x + 1, y) in inner_tiles:
+    if (
+        (x - 1, y) in inner_tiles
+        or (x + 1, y) in inner_tiles
+        or (x, y - 1) in inner_tiles
+        or (x, y + 1) in inner_tiles
+    ):
         inner_tiles.add((x, y))
         return True
+    if (
+        (x - 1, y) in outer_tiles
+        or (x + 1, y) in outer_tiles
+        or (x, y - 1) in outer_tiles
+        or (x, y + 1) in outer_tiles
+    ):
+        outer_tiles.add((x, y))
+        return False
     # is x closer to min_x or max_x ?
     if x - min_x < max_x - x:
         r = (min_x, x + 1)
@@ -75,32 +73,35 @@ def is_in_polygon(x, y):
     if count % 2 == 1:
         inner_tiles.add((x, y))
         return True
-    return False
+    else:
+        outer_tiles.add((x, y))
+        return False
 
 
-for i in range(len(tiles)):
-    print("starting row", i)
-    inner_tiles = set()  # clear cache, I'm afraid of ram usage
-    for j in range(i + 1, len(tiles)):
-        x1, y1 = tiles[i]
-        x2, y2 = tiles[j]
-        # fast check: only continue if four squares are in green tiles
-        if not is_in_polygon(x1, y2) or not is_in_polygon(x2, y1):
-            continue
-        # slow check : only if every side are in green tiles (will this be enough ???)
-        should_stop = False
-        for k in range(min(x1, x2), max(x1, x2) + 1):
-            if not is_in_polygon(k, y1) or not is_in_polygon(k, y2):
-                should_stop = True
-                break
-        if should_stop:
-            continue
-        for k in range(min(y1, y2), max(y1, y2) + 1):
-            if not is_in_polygon(x1, k) or not is_in_polygon(x2, k):
-                should_stop = True
-                break
-        if should_stop:
-            continue
-        # print((x1, y1), (x2, y2), (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1))
-        areas.append((abs(x1 - x2) + 1) * (abs(y1 - y2) + 1))
-print(max(areas))
+bin_min = 0
+bin_max = len(areas) - 1
+
+for i, j, area in areas:
+    print(i, j, area)
+    x1, y1 = tiles[i]
+    x2, y2 = tiles[j]
+    # fast check: only continue if four squares are in green tiles
+    if not is_in_polygon(x1, y2) or not is_in_polygon(x2, y1):
+        continue
+    # slow check : only if every side are in green tiles (will this be enough ???)
+    should_stop = False
+    for k in range(min(x1, x2), max(x1, x2) + 1):
+        if not is_in_polygon(k, y1) or not is_in_polygon(k, y2):
+            should_stop = True
+            break
+    if should_stop:
+        continue
+    for k in range(min(y1, y2), max(y1, y2) + 1):
+        if not is_in_polygon(x1, k) or not is_in_polygon(x2, k):
+            should_stop = True
+            break
+    if should_stop:
+        continue
+    # print((x1, y1), (x2, y2), (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1))
+    print(area)  # 1550760868
+    exit()
